@@ -854,8 +854,8 @@ PlayerSettings:
   apiCompatibilityLevelPerPlatform: {}
   m_RenderingPath: 1
   m_MobileRenderingPath: 1
-  metroPackageName: VirtualReality_VR_Demo
-  metroPackageVersion: 
+  metroPackageName: VirtualRealityVRDemo
+  metroPackageVersion: 1.0.0.0
   metroCertificatePath: 
   metroCertificatePassword: 
   metroCertificateSubject: 
@@ -863,7 +863,7 @@ PlayerSettings:
   metroCertificateNotAfter: 0000000000000000
   metroApplicationDescription: VirtualReality_VR_Demo
   wsaImages: {}
-  metroTileShortName: 
+  metroTileShortName: VirtualReality_VR_Demo
   metroTileShowName: 0
   metroMediumTileShowName: 0
   metroLargeTileShowName: 0
