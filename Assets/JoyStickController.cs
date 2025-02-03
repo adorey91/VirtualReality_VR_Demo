@@ -11,6 +11,8 @@ public class JoyStickController : UnityEngine.XR.Interaction.Toolkit.Interactabl
 
     [SerializeField] private Transform handle;
     [SerializeField] private Transform crane; // Reference to crane object
+    [SerializeField] private float minDistance = 0.1f; // Minimum distance from boundaries
+    public LayerMask collision; // Layer mask for collision detection
     [SerializeField] private float maxAngle = 30f;
     [SerializeField] private float returnSpeed = 5f;
     [SerializeField] private float moveSpeed = 2f; // Speed of crane movement
@@ -30,7 +32,10 @@ public class JoyStickController : UnityEngine.XR.Interaction.Toolkit.Interactabl
     {
         base.Awake();
         initialRotation = handle.localRotation;
+        craneRB = crane.GetComponent<Rigidbody>();
     }
+
+
 
     protected override void OnEnable()
     {
@@ -85,7 +90,7 @@ public class JoyStickController : UnityEngine.XR.Interaction.Toolkit.Interactabl
         currentInput = new Vector2(xAngle / maxAngle, zAngle / maxAngle);
 
         // Debug to check direction
-        Debug.Log("Lever moved: " + currentInput);
+        //Debug.Log("Lever moved: " + currentInput);
 
         onLeverMove.Invoke(currentInput);
 
@@ -99,7 +104,7 @@ public class JoyStickController : UnityEngine.XR.Interaction.Toolkit.Interactabl
         currentInput = Vector2.Lerp(currentInput, Vector2.zero, Time.deltaTime * returnSpeed);
 
         // Debug to confirm reset
-        Debug.Log("Lever resetting to center");
+        //Debug.Log("Lever resetting to center");
 
         onLeverMove.Invoke(currentInput);
     }
@@ -110,8 +115,19 @@ public class JoyStickController : UnityEngine.XR.Interaction.Toolkit.Interactabl
         // Calculate new position
         Vector3 newPosition = new Vector3(currentInput.x, 0, currentInput.y);
 
+        if (!CanMove(newPosition)) return;
+
         craneRB.MovePosition(crane.position + newPosition * moveSpeed * Time.deltaTime);
 
-        Debug.Log("Crane position: " + crane.position);
+        //Debug.Log("Crane position: " + crane.position);
+    }
+
+    private bool CanMove(Vector3 direction)
+    {
+        if (Physics.Raycast(crane.transform.position, direction, out _, minDistance, collision))
+        {
+            return false; // Can't move if an obstacle is within minDistance
+        }
+        return true;
     }
 }

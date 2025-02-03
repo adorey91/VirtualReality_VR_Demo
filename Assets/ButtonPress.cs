@@ -1,26 +1,20 @@
-using System;
+using System.Collections;
 using UnityEngine;
-using UnityEngine.Events;
 using UnityEngine.XR.Interaction.Toolkit;
-using UnityEngine.XR.Interaction.Toolkit.Interactors;
 
 public class ButtonPress : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBaseInteractable
 {
-    public class ButtonEvent : UnityEngine.Events.UnityEvent<bool> { }
-
     [SerializeField] private Transform button;
     [SerializeField] private Transform crane;
-
-    private IXRActivateInteractor interactor;
 
     private Vector3 initialButtonPosition;
     private Vector3 initialCranePosition;
 
     private bool isPressed = false;
-    private bool hasCraneMoved = false;
+    private float buttonPressDistance = 0.01f; // Limit button movement
+    private float craneMoveDistance = 0.5f; // Limit crane movement
 
-    private float buttonPressDistance = 0.01f; // How far the button should move
-    private float craneMoveDistance = 0.5f; // How far the crane should move
+    private float cranePauseTime = 1.5f; // Pause before moving up
 
     protected override void Awake()
     {
@@ -32,57 +26,65 @@ public class ButtonPress : UnityEngine.XR.Interaction.Toolkit.Interactables.XRBa
     protected override void OnEnable()
     {
         base.OnEnable();
-        selectEntered.AddListener(StartGrab);
-        selectExited.AddListener(EndGrab);
+        selectEntered.AddListener(OnPress);
+        selectExited.AddListener(OnRelease);
     }
 
     protected override void OnDisable()
     {
-        selectEntered.RemoveListener(StartGrab);
-        selectExited.RemoveListener(EndGrab);
+        selectEntered.RemoveListener(OnPress);
+        selectExited.RemoveListener(OnRelease);
         base.OnDisable();
     }
 
-    private void StartGrab(SelectEnterEventArgs args)
+    private void OnPress(SelectEnterEventArgs args)
     {
-        interactor = (IXRActivateInteractor)args.interactorObject;
-    }
-
-    private void EndGrab(SelectExitEventArgs args)
-    {
-        isPressed = false;
-        interactor = null;
-        ResetButtonAndCrane(); // Reset button and crane when released
-    }
-
-    public override void ProcessInteractable(XRInteractionUpdateOrder.UpdatePhase updatePhase)
-    {
-        if (interactor != null)
+        if (!isPressed)
         {
-            if (isPressed)
-            {
-                // Ensure the button stays in the pressed position, only resetting on release
-
-
-                button.localPosition = new Vector3(initialButtonPosition.x, initialButtonPosition.y - buttonPressDistance, initialButtonPosition.z);
-
-                // Move the crane down
-                crane.position = new Vector3(crane.position.x, initialCranePosition.y - craneMoveDistance, crane.position.z);
-            }
-            else
-            {
-                // Reset button and crane positions if not pressed
-                ResetButtonAndCrane();
-            }
+            isPressed = true;
+            StartCoroutine(MoveCrane());
         }
     }
 
-    private void ResetButtonAndCrane()
+    private void OnRelease(SelectExitEventArgs args)
     {
-        // Reset button position to the initial position
-        button.localPosition = initialButtonPosition;
+        isPressed = false;
+        ResetButton();
+    }
 
-        // Reset crane position to the initial position
-        crane.position = initialCranePosition;
+    private IEnumerator MoveCrane()
+    {
+        // Press button
+        button.localPosition = new Vector3(initialButtonPosition.x, initialButtonPosition.y - buttonPressDistance, initialButtonPosition.z);
+
+        // Move crane down directly below button
+        Vector3 targetPosition = new Vector3(button.position.x, initialCranePosition.y - craneMoveDistance, button.position.z);
+        float time = 0;
+        while (time < 1f)
+        {
+            crane.position = Vector3.Lerp(initialCranePosition, targetPosition, time);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        // Pause at bottom
+        yield return new WaitForSeconds(cranePauseTime);
+
+        // Move crane back up
+        time = 0;
+        while (time < 1f)
+        {
+            crane.position = Vector3.Lerp(targetPosition, initialCranePosition, time);
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        // Reset button
+        ResetButton();
+    }
+
+    private void ResetButton()
+    {
+        button.localPosition = initialButtonPosition;
     }
 }
