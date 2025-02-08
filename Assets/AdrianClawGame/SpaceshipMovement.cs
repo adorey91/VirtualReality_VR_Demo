@@ -2,24 +2,28 @@ using UnityEngine;
 
 public class SpaceshipMovement : MonoBehaviour
 {
-    private Vector2 currentInput;
     [SerializeField] private JoystickValueSO joystick;
-    [SerializeField] private GameObject crane;
-    private Rigidbody craneRB;
     [SerializeField] private float moveSpeed = 2f; // Speed of crane movement
-    bool isActive;
-    private Vector3 leverInput;
     [SerializeField] private float minDistance = 0.1f; // Minimum distance from boundaries
     [SerializeField] private LayerMask collision; // Layer mask for collision detection
+    [SerializeField] private GameObject ship; // Crane object
+
+    private GameObject crane;
+    private Rigidbody craneRB;
+    private Vector3 leverInput;
+    bool isActive;
+
+    private Coroutine dropCoroutine;
 
     private void Awake()
     {
+        crane = this.gameObject;
         craneRB = crane.GetComponent<Rigidbody>();
     }
 
     private void Update()
     {
-        if (isActive)
+        if (isActive && !ShipCollect.isDropping && !ShipCollect.isHoldingCow)
         {
             leverInput = new(joystick.Value.x, 0, joystick.Value.z);
             MoveCrane();

@@ -5,6 +5,8 @@ TagManager:
   serializedVersion: 2
   tags:
   - Anchor
+  - Cow
+  - Button
   layers:
   - Default
   - TransparentFX

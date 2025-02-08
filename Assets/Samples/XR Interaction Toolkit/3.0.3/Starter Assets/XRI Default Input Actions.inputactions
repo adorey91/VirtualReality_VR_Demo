@@ -2763,6 +2763,34 @@
                     "isPartOfComposite": true
                 }
             ]
+        },
+        {
+            "name": "Keyboard",
+            "id": "78d34e23-554a-4f7b-9787-b1452065bbb0",
+            "actions": [
+                {
+                    "name": "Test",
+                    "type": "Button",
+                    "id": "02c3085e-afd3-4931-86f3-7887ad3a0bfd",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "a773b2d0-0266-423c-812d-05f9cb0f76c8",
+                    "path": "<Keyboard>/space",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Test",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
